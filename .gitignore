@@ -1,0 +1,11 @@
+*/__pycache__/
+MICCAI_data/data
+*.jpg
+*.png
+*.bmp
+*.log
+model/
+logs/
+*.swp
+unet/checkpoints/
+*.py_
