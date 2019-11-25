@@ -50,12 +50,8 @@ class MyFcn(torch.nn.Module):
         p_out = F.relu(self.conv5_p(h))
         p_out = F.relu(self.conv6_p(p_out))
         p_out = self.conv7_p(p_out)
-        #import cv2
-        #cv2.imwrite('p.jpg', F.sigmoid(p_out.data).cpu().numpy()[0, 1] * 255)
-        #exit()
         if flag_a2c:
             if add_noise:
-                #u_out = F.sigmoid(p_out.data + torch.from_numpy(randn(*p_out.shape).astype(np.float32)).cuda() * 2) # XXX before 20191012
                 p_out = p_out.data + torch.from_numpy(randn(p_out.shape[0], p_out.shape[1], 1, 1).astype(np.float32)).cuda() * self.noise_scale
                 p_out = Variable(p_out)
             else:

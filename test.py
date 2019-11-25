@@ -22,11 +22,11 @@ from utils import PSNR, SSIM, NMSE, DC, computePSNR, computeSSIM, computeNMSE
 def parse():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', default='MICCAI_data', type=str,
-                        dest='dataset', help='which dataset to use')
+    parser.add_argument('--dataset', default='MICCAI', type=str,
+                        dest='dataset', help='to use dataset.py and config.py in which directory')
     parser.add_argument('--gpu', default=[0, 1], nargs='+', type=int,
                         dest='gpu', help='the gpu used')
-    parser.add_argument('--model', type=str, help='pth file to load')
+    parser.add_argument('--model', type=str, help='file of the trained model')
 
     return parser.parse_args()
 
@@ -37,11 +37,6 @@ def test(model, a2c, config, early_break=True, batch_size=None, verbose=False):
     env = Env(config)
     if not os.path.exists('results/'):
         os.mkdir('results/')
-    if not os.path.exists('results/actions'):
-        os.mkdir('results/actions')
-    if not os.path.exists('results/action_distribution'):
-        os.mkdir('results/action_distribution')
-
 
     from dataset import MRIDataset
     test_loader = torch.utils.data.DataLoader(
@@ -81,8 +76,6 @@ def test(model, a2c, config, early_break=True, batch_size=None, verbose=False):
             p_list[t].append(p)
 
             actions = a2c.act(pi_out, deterministic=True)
-            #np.save('rebuttal/pi_out_' + str(j) + '.npy', pi_out.cpu().data.numpy())
-            #np.save('rebuttal/actions_' + str(j) + '.npy', actions)
             last_image = image.copy()
             image, reward = env.step(actions)
             image = np.clip(image, 0, 1)
@@ -95,25 +88,21 @@ def test(model, a2c, config, early_break=True, batch_size=None, verbose=False):
             for n in range(config.num_actions):
                 actions_prob[n, t] += np.sum(actions==n) / total
 
+            # draw action distribution on pixels
             for j in range(ori_image.shape[0]):
                 if i > 0:
                     break
-                for dd in ['results/actions/', 'results/action_distribution/']:
-                    if not os.path.exists(dd+str(j)):
-                        os.mkdir(dd+str(j))
+                for dd in ['results/actions/', 'results/time_steps']:
+                    if not os.path.exists(dd + str(j)):
+                        os.mkdir(dd + str(j))
                 a = actions[j].astype(np.uint8)
                 total = a.size
                 canvas = last_image[j, 0].copy()
-                unchanged_mask = np.abs(last_image[j, 0] - image[j, 0]) < (1 / 255)
-                #np.save('rebuttal/unchanged_mask_' + str(j) + '_'+ str(j) + '.npy', unchanged_mask)
+                unchanged_mask = np.abs(last_image[j, 0] - image[j, 0]) < (1 / 255) # some pixel values are not changed
                 for n in range(config.num_actions):
                     A = np.tile(canvas[..., np.newaxis], (1, 1, 3)) * 255
                     a_mask = (a==n) & (1 - unchanged_mask).astype(np.bool)
-                    #print(A.shape, a_mask.dtype)
-                    #print(a_mask.mean())
-                    #input()
                     A[a_mask, 2] += 250
-                    #print(A.shape, unchanged_mask.shape)
                     cv2.imwrite('results/actions/' + str(j) + '/' + str(n) + '_' + str(t) +'.bmp', A)
                 cv2.imwrite('results/actions/' + str(t) + '_unchanged.jpg', np.abs(last_image[j, 0] - image[j, 0]) * 255 * 255)
 
@@ -128,16 +117,17 @@ def test(model, a2c, config, early_break=True, batch_size=None, verbose=False):
             for k in range(2):
                 key = ['wo', 'DC'][k]
                 tmp_image = [image[j, 0], image_with_DC][k]
-               # print(k, ori_image[j, 0].min(), previous_image[j, 0].min(), tmp_image.min())
                 PSNR_dict[key].append(computePSNR(ori_image[j, 0], previous_image[j, 0], tmp_image)) 
                 SSIM_dict[key].append(computeSSIM(ori_image[j, 0], previous_image[j, 0], tmp_image))
                 NMSE_dict[key].append(computeNMSE(ori_image[j, 0], previous_image[j, 0], tmp_image))
                 if verbose:
                     print(j, key, PSNR_dict[key][-1], SSIM_dict[key][-1], NMSE_dict[key][-1])
 
+            # draw input, output and error maps
             cv2.imwrite('results/'+str(i)+'_'+str(j)+'.bmp', np.concatenate((ori_image[j, 0], mask_j, previous_image[j, 0], image[j, 0], image_with_DC, np.abs(ori_image[j, 0] - image[j, 0]) * 10), axis=1) * 255)
+            # draw output of different timesteps
             if verbose:
-                cv2.imwrite('results_time_steps/'+str(i)+'_'+str(j)+'.bmp', np.concatenate([image_history[jj][j, 0] for jj in range(config.episode_len)] + [image[j, 0], image_with_DC, ori_image[j, 0]], axis=1) * 255)
+                cv2.imwrite('results/time_steps/'+str(i)+'_'+str(j)+'.bmp', np.concatenate([image_history[jj][j, 0] for jj in range(config.episode_len)] + [image[j, 0], image_with_DC, ori_image[j, 0]], axis=1) * 255)
 
     print('actions_prob', actions_prob / count)
 

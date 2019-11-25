@@ -58,4 +58,4 @@ class config:
 
     #-------------folder--------------------#
     dataset = 'MICCAI'
-    root = 'MICCAI/data/'
+    root = 'hemorrhage/'

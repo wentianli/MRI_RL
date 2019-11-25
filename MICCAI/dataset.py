@@ -9,10 +9,10 @@ from torchvision.transforms import Compose, RandomHorizontalFlip, RandomRotation
 
 from utils import Downsample
 
-def load_mask(root, sampling_ratio):
+def load_mask(sampling_ratio):
     assert sampling_ratio in [10, 20, 30, 40, 50]
     from scipy.io import loadmat
-    mask = loadmat('{}/../mask/Gaussian1D/GaussianDistribution1DMask_{}.mat'.format(root, sampling_ratio))
+    mask = loadmat('MICCAI/mask/Gaussian1D/GaussianDistribution1DMask_{}.mat'.format(sampling_ratio))
     mask = mask['maskRS1']
     print('mask:', np.mean(mask))
     return mask
@@ -24,7 +24,7 @@ class MRIDataset(data.Dataset):
         self.transform = transform
         self.ids = [i.strip() for i in open(self.root + self.image_set + '.txt').readlines()]
 
-        self.mask = load_mask(self.root, config.sampling_ratio)
+        self.mask = load_mask(config.sampling_ratio)
         #self.DAGAN = 'SegChallenge' in root and image_set == 'test'
 
     def __getitem__(self, index):

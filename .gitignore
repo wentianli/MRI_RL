@@ -1,5 +1,6 @@
+__pycache__/
 */__pycache__/
-MICCAI_data/data
+MICCAI/data
 *.jpg
 *.png
 *.bmp
@@ -9,3 +10,5 @@ logs/
 *.swp
 unet/checkpoints/
 *.py_
+*.pth
+*.pt

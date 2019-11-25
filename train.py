@@ -26,7 +26,7 @@ def parse():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', default='MICCAI', type=str,
-                        dest='dataset', help='which dataset to use')
+                        dest='dataset', help='to use dataset.py and config.py in which directory')
     parser.add_argument('--gpu', default=[0, 1], nargs='+', type=int,
                         dest='gpu', help='the gpu used')
 
