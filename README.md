@@ -1,6 +1,6 @@
 # MRI_RL
 
-This is the implementation of our AAAI 2020 paper:<br>
+This is the implementation of our AAAI 2020 [paper](https://ojs.aaai.org/index.php/AAAI/article/view/5423):<br>
 MRI Reconstruction with Interpretable Pixel-Wise Operations Using Reinforcement Learning
 
 ```
@@ -50,7 +50,7 @@ See `unet/` for more details.
 
 We povide our model trained on MICCAI with 30% mask, our model and Unet trained on fastMRI with 40% mask.
 
-The trained models can be downloaded here: [百度网盘](https://pan.baidu.com/s/1y2OXdERwmeYZEGDsI-r2UQ).
+The trained models can be downloaded here: [百度网盘](https://pan.baidu.com/s/1y2OXdERwmeYZEGDsI-r2UQ) or [drive.google](https://drive.google.com/folderview?id=1-5F_qoX25HY1oxpZtsMXv7qTZUCY6Eo_).
 
 
 ## Testing
